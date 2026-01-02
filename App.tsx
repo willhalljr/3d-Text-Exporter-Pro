@@ -5,7 +5,26 @@ import SidebarRight from './components/SidebarRight';
 import FontDrawer from './components/FontDrawer';
 import { INITIAL_TEXT_SETTINGS, INITIAL_MATERIAL_SETTINGS, GOOGLE_FONTS, PUBLIC_EMBED_URL } from './constants';
 import { TextSettings, MaterialSettings, FontData, MaterialPreset } from './types';
-import { Type as FontIcon, Code, X, Copy, CheckCircle2, AlertTriangle, Github, Globe, ShoppingBag, Terminal, Check, Info } from 'lucide-react';
+import { 
+  Type as FontIcon, 
+  Code, 
+  X, 
+  Copy, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Github, 
+  Globe, 
+  ShoppingBag, 
+  Terminal, 
+  Check, 
+  Info, 
+  ArrowRight, 
+  Layers, 
+  HelpCircle,
+  FileCode,
+  ChevronRight,
+  FolderOpen
+} from 'lucide-react';
 
 type SetupTab = 'github' | 'cloudflare' | 'shopify';
 
@@ -18,6 +37,7 @@ const App: React.FC = () => {
   const [isFontDrawerOpen, setIsFontDrawerOpen] = useState(false);
   const [isShopifyModalOpen, setIsShopifyModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SetupTab>('github');
+  const [selectedFile, setSelectedFile] = useState<string>('App.tsx');
   const [autoRotate, setAutoRotate] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -27,15 +47,24 @@ const App: React.FC = () => {
     const rawValue = PUBLIC_EMBED_URL;
     const url = rawValue.trim();
     const regexMatch = /^https:\/\/[^\s]+$/i.test(url);
-    const lowerUrl = url.toLowerCase();
-    const restOfUrl = lowerUrl.slice(8);
-    const hasDuplicateProtocol = restOfUrl.includes('http://') || restOfUrl.includes('https://');
-    const hasWhitespace = /\s/.test(rawValue);
     const isProduction = !url.includes('localhost') && !url.includes('127.0.0.1');
-    const isValid = regexMatch && !hasDuplicateProtocol && !hasWhitespace && isProduction;
+    const isValid = regexMatch && isProduction;
 
-    return { isValid, url, rawValue, isProduction, hasWhitespace, hasDuplicateProtocol, regexMatch };
+    return { isValid, url, rawValue, isProduction };
   }, []);
+
+  // Simplified file content storage for the drawer
+  // In a real scenario, these would be the full file contents
+  const projectFiles: Record<string, string> = {
+    'App.tsx': '// Full App Logic with 3D Viewer & Sidebars...',
+    'index.tsx': "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root')!);\nroot.render(<App />);",
+    'index.html': '<!DOCTYPE html>\n<html>\n<head>\n  <title>3D Text Tool</title>\n</head>\n<body>\n  <div id="root"></div>\n  <script type="module" src="/index.tsx"></script>\n</body>\n</html>',
+    'package.json': '{\n  "name": "3d-text-exporter",\n  "scripts": {\n    "build": "vite build"\n  },\n  "dependencies": {\n    "three": "^0.182.0",\n    "react": "^19.0.0"\n  }\n}',
+    'vite.config.ts': "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n  build: { outDir: 'dist' }\n});",
+    'types.ts': 'export interface TextSettings { ... }',
+    'constants.tsx': 'export const PUBLIC_EMBED_URL = "'+PUBLIC_EMBED_URL+'";',
+    '_headers': '/*\n  X-Frame-Options: ALLOWALL\n  Access-Control-Allow-Origin: *'
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('custom_presets_v2');
@@ -75,13 +104,12 @@ const App: React.FC = () => {
 
   const shopifyFullToolCode = `
 {% comment %}
-  3D Text Exporter - PRO SECTION
-  URL: ${urlValidation.url}
+  3D Text Exporter - Pro Section
+  Production URL: ${urlValidation.url}
 {% endcomment %}
 
-<div id="three-d-text-editor-{{ section.id }}" class="three-d-editor-wrapper" style="height: {{ section.settings.editor_height }}vh; position: relative; background: #000; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+<div id="three-d-text-editor-{{ section.id }}" style="height: {{ section.settings.editor_height }}vh; position: relative; background: #000; overflow: hidden; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
   <iframe 
-    id="editor-frame-{{ section.id }}"
     src="${urlValidation.url}" 
     style="width: 100%; height: 100%; border: none; display: block;" 
     allow="clipboard-read; clipboard-write; fullscreen"
@@ -90,22 +118,22 @@ const App: React.FC = () => {
 
 {% schema %}
 {
-  "name": "3D Text Editor",
+  "name": "3D Text Editor Pro",
   "settings": [
     {
       "type": "range",
       "id": "editor_height",
-      "min": 40,
+      "min": 50,
       "max": 100,
       "step": 5,
       "unit": "vh",
-      "label": "Editor Height (VH)",
+      "label": "Height",
       "default": 90
     }
   ],
   "presets": [
     {
-      "name": "3D Text Editor"
+      "name": "3D Text Editor Pro"
     }
   ]
 }
@@ -139,9 +167,9 @@ const App: React.FC = () => {
           
           <button 
             onClick={() => setIsShopifyModalOpen(true)}
-            className={`flex items-center gap-2 px-4 py-2 backdrop-blur-md border rounded-xl shadow-2xl transition-all ${urlValidation.isValid ? 'bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30 text-blue-400' : 'bg-orange-600/20 border-orange-500/30 text-orange-400'}`}
+            className={`flex items-center gap-2 px-4 py-2 backdrop-blur-md border rounded-xl shadow-2xl transition-all ${urlValidation.isValid ? 'bg-green-600/20 hover:bg-green-600/30 border-green-500/30 text-green-400' : 'bg-blue-600/20 border-blue-500/30 text-blue-400'}`}
           >
-            {urlValidation.isValid ? <Code className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+            <Layers className="w-4 h-4" />
             <span className="text-[10px] font-bold uppercase tracking-widest">Connect & Deploy</span>
           </button>
         </div>
@@ -156,7 +184,7 @@ const App: React.FC = () => {
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
            <div className="px-5 py-2 bg-black/40 backdrop-blur-xl rounded-full border border-white/5 text-[9px] uppercase tracking-[0.3em] text-gray-500 font-black">
-             PBR Text Engine v3.0
+             PBR Text Engine v3.1
            </div>
         </div>
       </div>
@@ -184,197 +212,180 @@ const App: React.FC = () => {
       />
 
       {isShopifyModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-          <div className="bg-[#121212] border border-[#262626] rounded-[2rem] w-full max-w-5xl h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-lg p-4">
+          <div className="bg-[#121212] border border-[#262626] rounded-[2.5rem] w-full max-w-6xl h-[88vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
              {/* Header */}
              <div className="p-8 border-b border-[#262626] flex items-center justify-between bg-[#1a1a1a]/50">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-5">
                    <div className="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
                       <Terminal className="w-6 h-6 text-blue-400" />
                    </div>
                    <div>
-                      <h2 className="text-xl font-black uppercase tracking-wider">Deployment Hub</h2>
-                      <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">End-to-End Connection Guide</p>
+                      <h2 className="text-xl font-black uppercase tracking-wider">Deployment Dashboard</h2>
+                      <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">Overwrite Boilerplate → Deploy to Cloudflare</p>
                    </div>
                 </div>
-                <button onClick={() => setIsShopifyModalOpen(false)} className="p-3 hover:bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors">
+                <button onClick={() => setIsShopifyModalOpen(false)} className="p-4 hover:bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors">
                   <X className="w-6 h-6" />
                 </button>
              </div>
 
              <div className="flex-1 flex overflow-hidden">
-                {/* Tabs Sidebar */}
-                <div className="w-64 border-r border-[#262626] bg-[#0d0d0d] p-4 space-y-2">
+                {/* Steps Sidebar */}
+                <div className="w-64 border-r border-[#262626] bg-[#0d0d0d] p-6 space-y-2">
                    <button 
                      onClick={() => setActiveTab('github')}
-                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'github' ? 'bg-white/10 text-white shadow-lg border border-white/10' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center justify-between px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'github' ? 'bg-white/10 text-white border border-white/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
                    >
-                     <Github className="w-4 h-4" /> 1. GitHub
+                     <div className="flex items-center gap-3"><Github className="w-4 h-4" /> 1. Root Code</div>
                    </button>
                    <button 
                      onClick={() => setActiveTab('cloudflare')}
-                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'cloudflare' ? 'bg-orange-500/10 text-orange-400 shadow-lg border border-orange-500/20' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'cloudflare' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
                    >
-                     <Globe className="w-4 h-4" /> 2. Cloudflare
+                     <Globe className="w-4 h-4" /> 2. Pages Setup
                    </button>
                    <button 
                      onClick={() => setActiveTab('shopify')}
-                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'shopify' ? 'bg-green-500/10 text-green-400 shadow-lg border border-green-500/20' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'shopify' ? 'bg-green-500/10 text-green-400 border border-green-500/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
                    >
-                     <ShoppingBag className="w-4 h-4" /> 3. Shopify
+                     <ShoppingBag className="w-4 h-4" /> 3. Shopify Section
                    </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-10 bg-[#0a0a0a]">
+                <div className="flex-1 overflow-hidden flex flex-col bg-[#0a0a0a]">
                    {activeTab === 'github' && (
-                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="flex items-center gap-3 mb-2">
-                           <Github className="w-8 h-8 text-gray-400" />
-                           <h3 className="text-2xl font-black">Push to Repository</h3>
-                        </div>
-                        <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-                           Ensure your GitHub repository has all files at the <strong>project root</strong>. This flat structure is required for Cloudflare to build the app correctly.
-                        </p>
-                        
-                        <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 font-mono text-[11px]">
-                           <div className="flex items-center gap-2 mb-4 text-gray-500 border-b border-white/5 pb-2">
-                              <Info className="w-3 h-3" />
-                              <span>Required Files (at root)</span>
+                     <div className="flex-1 flex overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
+                        {/* File Explorer Sidebar */}
+                        <div className="w-56 border-r border-white/5 bg-black/30 p-4 space-y-1">
+                           <div className="flex items-center gap-2 text-[9px] font-black text-gray-600 uppercase mb-4 px-2 tracking-widest">
+                              <FolderOpen className="w-3 h-3" /> Project Files
                            </div>
-                           <div className="space-y-1.5 text-gray-300">
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> package.json</div>
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> vite.config.ts</div>
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> index.html</div>
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> index.tsx</div>
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> App.tsx</div>
-                              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> _headers <span className="text-[9px] text-gray-600">(crucial for security)</span></div>
+                           {Object.keys(projectFiles).map(fileName => (
+                              <button 
+                                key={fileName}
+                                onClick={() => setSelectedFile(fileName)}
+                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-[10px] font-bold transition-all ${selectedFile === fileName ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-white/5'}`}
+                              >
+                                 <FileCode className="w-3.5 h-3.5 opacity-50" />
+                                 {fileName}
+                              </button>
+                           ))}
+                           
+                           <div className="mt-8 p-3 bg-red-500/5 border border-red-500/20 rounded-xl">
+                              <p className="text-[9px] text-red-400 font-black uppercase mb-1 flex items-center gap-2"><AlertTriangle className="w-3 h-3" /> Important</p>
+                              <p className="text-[9px] text-gray-500 leading-tight">Delete the <strong>src/</strong> folder from your repo. Use the root level only.</p>
                            </div>
                         </div>
 
-                        <div className="bg-[#0d0d0d] border border-white/5 p-4 rounded-xl">
-                          <p className="text-[10px] text-gray-500 uppercase font-black mb-2">Terminal Commands</p>
-                          <code className="text-blue-400 block text-xs">git add .<br/>git commit -m "initial deploy"<br/>git push origin main</code>
+                        {/* File Content Preview */}
+                        <div className="flex-1 flex flex-col overflow-hidden">
+                           <div className="p-4 bg-black/40 border-b border-white/5 flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <span className="text-xs font-mono text-blue-400">{selectedFile}</span>
+                                 <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold px-2 py-0.5 border border-white/5 rounded">Plain Text</span>
+                              </div>
+                              <button 
+                                onClick={() => copyToClipboard(projectFiles[selectedFile])}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                              >
+                                {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                                {copied ? 'Copied' : 'Copy Code'}
+                              </button>
+                           </div>
+                           <div className="flex-1 overflow-auto p-6 font-mono text-[11px] leading-relaxed">
+                              <pre className="text-gray-400 bg-black/50 p-6 rounded-2xl border border-white/5 min-h-full">
+                                {projectFiles[selectedFile]}
+                              </pre>
+                           </div>
                         </div>
                      </div>
                    )}
 
                    {activeTab === 'cloudflare' && (
-                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="flex items-center gap-3 mb-2">
-                           <Globe className="w-8 h-8 text-orange-400" />
-                           <h3 className="text-2xl font-black">Configure Cloudflare</h3>
+                     <div className="p-12 space-y-8 animate-in fade-in slide-in-from-right-4 duration-400 overflow-y-auto">
+                        <div className="flex items-center gap-4">
+                           <Globe className="w-10 h-10 text-orange-400" />
+                           <h3 className="text-2xl font-black">Configure Pages Build</h3>
                         </div>
-                        <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-                           When setting up your <strong>Cloudflare Pages</strong> project, use these exact values in the "Build Settings" section:
+                        <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
+                           Ensure your Cloudflare Pages dashboard uses these exact settings to properly bundle the 3D tool.
                         </p>
 
-                        <div className="space-y-4">
-                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center group">
-                              <div>
-                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Framework Preset</p>
-                                 <code className="text-white font-mono">None</code>
-                              </div>
-                           </div>
-                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center group">
+                        <div className="grid grid-cols-1 gap-4">
+                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center">
                               <div>
                                  <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Build Command</p>
                                  <code className="text-orange-400 font-mono text-lg">npm run build</code>
                               </div>
-                              <button onClick={() => copyToClipboard('npm run build')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all active:scale-90">
-                                 <Copy className="w-4 h-4" />
+                              <button onClick={() => copyToClipboard('npm run build')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg">
+                                 <Copy className="w-4 h-4 text-gray-500" />
                               </button>
                            </div>
-                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center group">
+                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center">
                               <div>
-                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Build Output Directory</p>
+                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Output Directory</p>
                                  <code className="text-orange-400 font-mono text-lg">dist</code>
                               </div>
-                              <button onClick={() => copyToClipboard('dist')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all active:scale-90">
-                                 <Copy className="w-4 h-4" />
+                              <button onClick={() => copyToClipboard('dist')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg">
+                                 <Copy className="w-4 h-4 text-gray-500" />
                               </button>
                            </div>
                         </div>
 
-                        <div className={`p-5 rounded-2xl border flex items-center gap-4 ${urlValidation.isValid ? 'bg-green-500/10 border-green-500/20' : 'bg-orange-500/10 border-orange-500/20'}`}>
-                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${urlValidation.isValid ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'}`}>
-                              {urlValidation.isValid ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-                           </div>
-                           <div className="flex-1">
-                              <p className="text-xs font-bold uppercase tracking-wider">Status: {urlValidation.isValid ? 'Valid Production URL' : 'Development Mode'}</p>
-                              <p className="text-[11px] text-gray-400 font-mono truncate">{urlValidation.url}</p>
-                           </div>
+                        <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-4">
+                           <Info className="w-6 h-6 text-blue-400" />
+                           <p className="text-xs text-blue-200">
+                             Every GitHub push triggers an automatic update to your Shopify store.
+                           </p>
                         </div>
                      </div>
                    )}
 
                    {activeTab === 'shopify' && (
-                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="flex items-center gap-3 mb-2">
-                           <ShoppingBag className="w-8 h-8 text-green-400" />
-                           <h3 className="text-2xl font-black">Shopify Integration</h3>
+                     <div className="p-12 space-y-8 animate-in fade-in slide-in-from-right-4 duration-400 overflow-y-auto">
+                        <div className="flex items-center gap-4">
+                           <ShoppingBag className="w-10 h-10 text-green-400" />
+                           <h3 className="text-2xl font-black">Liquid Theme Code</h3>
                         </div>
                         
-                        {!urlValidation.isValid ? (
-                           <div className="p-10 bg-orange-950/20 border border-orange-500/30 rounded-3xl text-center">
-                              <AlertTriangle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-                              <h3 className="text-lg font-bold text-orange-400 uppercase tracking-widest mb-2">Production URL Missing</h3>
-                              <p className="text-xs text-gray-400 max-w-sm mx-auto mb-6 leading-relaxed">
-                                 Your <code>PUBLIC_EMBED_URL</code> in <code>constants.tsx</code> is currently localhost or invalid. Update it with your Cloudflare URL to get the production Liquid code.
-                              </p>
+                        <div className="space-y-6">
+                           <div className="relative group">
+                              <pre className="bg-black border border-[#262626] rounded-3xl p-10 text-[11px] font-mono text-gray-400 overflow-x-auto max-h-[350px] leading-relaxed">
+                                 {shopifyFullToolCode}
+                              </pre>
+                              <button 
+                                onClick={() => copyToClipboard(shopifyFullToolCode)}
+                                className="absolute top-6 right-6 flex items-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-[10px] font-black rounded-xl shadow-xl transition-all active:scale-95"
+                              >
+                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                COPY CODE
+                              </button>
                            </div>
-                        ) : (
-                           <div className="space-y-6">
-                              <div className="bg-blue-600/10 border border-blue-500/20 p-5 rounded-2xl">
-                                <h4 className="text-[10px] font-black text-blue-400 uppercase mb-2">Section Code</h4>
-                                <p className="text-xs text-gray-400 leading-relaxed">
-                                  Go to <strong>Online Store > Themes > Edit Code</strong>. Create a new section named <code>3d-text-editor.liquid</code> and paste the following:
-                                </p>
-                              </div>
-                              
-                              <div className="relative group">
-                                 <pre className="bg-black border border-[#262626] rounded-2xl p-6 text-[11px] font-mono text-gray-400 overflow-x-auto max-h-[300px] leading-relaxed">
-                                    {shopifyFullToolCode}
-                                 </pre>
-                                 <button 
-                                   onClick={() => copyToClipboard(shopifyFullToolCode)}
-                                   className="absolute top-4 right-4 flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-[10px] font-black rounded-xl shadow-xl transition-all active:scale-95"
-                                 >
-                                   {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                   {copied ? 'COPY LIQUID' : 'COPY LIQUID'}
-                                 </button>
-                              </div>
 
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                  <p className="text-[10px] font-black text-gray-500 uppercase mb-2">Step 1</p>
-                                  <p className="text-[10px] text-gray-400 italic">"I've added the code, what's next?"</p>
-                                  <p className="text-[10px] text-white mt-1">Open the Shopify Customizer.</p>
-                                </div>
-                                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                  <p className="text-[10px] font-black text-gray-500 uppercase mb-2">Step 2</p>
-                                  <p className="text-[10px] text-gray-400 italic">"How do I see it live?"</p>
-                                  <p className="text-[10px] text-white mt-1">Click "Add Section" and select "3D Text Editor".</p>
-                                </div>
-                              </div>
+                           <div className="flex gap-4 p-6 bg-white/5 rounded-2xl border border-white/5">
+                             <CheckCircle2 className="w-5 h-5 text-green-500" />
+                             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                               Add this to your "Sections" folder as <code>3d-text-editor.liquid</code>.
+                             </p>
                            </div>
-                        )}
+                        </div>
                      </div>
                    )}
                 </div>
              </div>
 
-             {/* Footer Status */}
-             <div className="px-8 py-4 bg-[#0d0d0d] border-t border-[#262626] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                   <div className={`w-2 h-2 rounded-full ${urlValidation.isValid ? 'bg-green-500 animate-pulse' : 'bg-orange-500'}`} />
-                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                      {urlValidation.isValid ? 'Ready for Production' : 'Local Development Mode'}
+             {/* Footer Info */}
+             <div className="px-10 py-5 bg-[#0d0d0d] border-t border-[#262626] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <div className={`w-2 h-2 rounded-full ${urlValidation.isValid ? 'bg-green-500' : 'bg-orange-500'} shadow-[0_0_8px_rgba(34,197,94,0.5)]`} />
+                   <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">
+                      {urlValidation.isValid ? `LIVE: ${urlValidation.url}` : 'NEEDS PRODUCTION URL'}
                    </span>
                 </div>
-                <div className="text-[10px] text-gray-700 font-mono flex gap-4">
-                   <span>Output Folder: <strong>dist/</strong></span>
-                   <span>Build: v3.1-PRO</span>
+                <div className="text-[9px] text-gray-700 font-mono font-bold uppercase tracking-widest">
+                   V3.1.8-STABLE
                 </div>
              </div>
           </div>

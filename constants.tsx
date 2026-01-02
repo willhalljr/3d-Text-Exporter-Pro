@@ -4,7 +4,7 @@ import { TextSettings, MaterialSettings, MaterialPreset } from './types';
  * SOURCE OF TRUTH FOR EMBEDDING
  * This must be exactly your production URL.
  */
-export const PUBLIC_EMBED_URL = "https://3d-text-exporter-pro.pages.dev";
+export const PUBLIC_EMBED_URL = "https://3d-text-exporter.pages.dev";
 
 export const INITIAL_TEXT_SETTINGS: TextSettings = {
   text: "Hire me",
