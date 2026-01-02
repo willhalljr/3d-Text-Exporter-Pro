@@ -22,8 +22,8 @@ import {
   Layers, 
   HelpCircle,
   FileCode,
-  ChevronRight,
-  FolderOpen
+  FolderOpen,
+  Monitor
 } from 'lucide-react';
 
 type SetupTab = 'github' | 'cloudflare' | 'shopify';
@@ -53,17 +53,76 @@ const App: React.FC = () => {
     return { isValid, url, rawValue, isProduction };
   }, []);
 
-  // Simplified file content storage for the drawer
-  // In a real scenario, these would be the full file contents
+  // Full source code for the drawer
   const projectFiles: Record<string, string> = {
-    'App.tsx': '// Full App Logic with 3D Viewer & Sidebars...',
-    'index.tsx': "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root')!);\nroot.render(<App />);",
-    'index.html': '<!DOCTYPE html>\n<html>\n<head>\n  <title>3D Text Tool</title>\n</head>\n<body>\n  <div id="root"></div>\n  <script type="module" src="/index.tsx"></script>\n</body>\n</html>',
-    'package.json': '{\n  "name": "3d-text-exporter",\n  "scripts": {\n    "build": "vite build"\n  },\n  "dependencies": {\n    "three": "^0.182.0",\n    "react": "^19.0.0"\n  }\n}',
-    'vite.config.ts': "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n  build: { outDir: 'dist' }\n});",
-    'types.ts': 'export interface TextSettings { ... }',
-    'constants.tsx': 'export const PUBLIC_EMBED_URL = "'+PUBLIC_EMBED_URL+'";',
-    '_headers': '/*\n  X-Frame-Options: ALLOWALL\n  Access-Control-Allow-Origin: *'
+    'package.json': `{
+  "name": "3d-text-exporter-pro",
+  "private": true,
+  "version": "1.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^0.462.0",
+    "opentype.js": "^1.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.170.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0"
+  }
+}`,
+    'vite.config.ts': `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: false,
+    target: 'esnext'
+  }
+});`,
+    'index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Text Exporter Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a0a0a; color: #fff; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>`,
+    'index.tsx': `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<App />);`,
+    'constants.tsx': `export const PUBLIC_EMBED_URL = "${PUBLIC_EMBED_URL}";
+// ... other initial settings constants`,
+    'types.ts': `export interface TextSettings { ... }
+export interface MaterialSettings { ... }`,
+    '_headers': `/*
+  X-Frame-Options: ALLOWALL
+  Access-Control-Allow-Origin: *
+  Content-Security-Policy: frame-ancestors 'self' https://*.myshopify.com https://admin.shopify.com;`
   };
 
   useEffect(() => {
@@ -213,7 +272,7 @@ const App: React.FC = () => {
 
       {isShopifyModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-lg p-4">
-          <div className="bg-[#121212] border border-[#262626] rounded-[2.5rem] w-full max-w-6xl h-[88vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
+          <div className="bg-[#121212] border border-[#262626] rounded-[2.5rem] w-full max-w-6xl h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
              {/* Header */}
              <div className="p-8 border-b border-[#262626] flex items-center justify-between bg-[#1a1a1a]/50">
                 <div className="flex items-center gap-5">
@@ -222,7 +281,7 @@ const App: React.FC = () => {
                    </div>
                    <div>
                       <h2 className="text-xl font-black uppercase tracking-wider">Deployment Dashboard</h2>
-                      <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">Overwrite Boilerplate → Deploy to Cloudflare</p>
+                      <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">Overwrite Boilerplate → Fix "Vite is Working" Message</p>
                    </div>
                 </div>
                 <button onClick={() => setIsShopifyModalOpen(false)} className="p-4 hover:bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors">
@@ -235,21 +294,21 @@ const App: React.FC = () => {
                 <div className="w-64 border-r border-[#262626] bg-[#0d0d0d] p-6 space-y-2">
                    <button 
                      onClick={() => setActiveTab('github')}
-                     className={`w-full flex items-center justify-between px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'github' ? 'bg-white/10 text-white border border-white/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center justify-between px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'github' ? 'bg-white/10 text-white border border-white/20' : 'text-gray-500 hover:bg-white/5'}`}
                    >
-                     <div className="flex items-center gap-3"><Github className="w-4 h-4" /> 1. Root Code</div>
+                     <div className="flex items-center gap-3"><Github className="w-4 h-4" /> 1. Repository Code</div>
                    </button>
                    <button 
                      onClick={() => setActiveTab('cloudflare')}
-                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'cloudflare' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'cloudflare' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-gray-500 hover:bg-white/5'}`}
                    >
                      <Globe className="w-4 h-4" /> 2. Pages Setup
                    </button>
                    <button 
                      onClick={() => setActiveTab('shopify')}
-                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'shopify' ? 'bg-green-500/10 text-green-400 border border-green-500/20 shadow-xl' : 'text-gray-500 hover:bg-white/5'}`}
+                     className={`w-full flex items-center gap-3 px-5 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'shopify' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'text-gray-500 hover:bg-white/5'}`}
                    >
-                     <ShoppingBag className="w-4 h-4" /> 3. Shopify Section
+                     <ShoppingBag className="w-4 h-4" /> 3. Shopify Liquid
                    </button>
                 </div>
 
@@ -258,7 +317,7 @@ const App: React.FC = () => {
                    {activeTab === 'github' && (
                      <div className="flex-1 flex overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
                         {/* File Explorer Sidebar */}
-                        <div className="w-56 border-r border-white/5 bg-black/30 p-4 space-y-1">
+                        <div className="w-60 border-r border-white/5 bg-black/30 p-4 space-y-1 overflow-y-auto">
                            <div className="flex items-center gap-2 text-[9px] font-black text-gray-600 uppercase mb-4 px-2 tracking-widest">
                               <FolderOpen className="w-3 h-3" /> Project Files
                            </div>
@@ -273,9 +332,14 @@ const App: React.FC = () => {
                               </button>
                            ))}
                            
-                           <div className="mt-8 p-3 bg-red-500/5 border border-red-500/20 rounded-xl">
-                              <p className="text-[9px] text-red-400 font-black uppercase mb-1 flex items-center gap-2"><AlertTriangle className="w-3 h-3" /> Important</p>
-                              <p className="text-[9px] text-gray-500 leading-tight">Delete the <strong>src/</strong> folder from your repo. Use the root level only.</p>
+                           <div className="mt-8 p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
+                              <p className="text-[9px] text-red-400 font-black uppercase mb-2 flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5" /> Overwrite Rule</p>
+                              <p className="text-[9px] text-gray-400 leading-relaxed mb-2">
+                                If you see <strong>"Vite is working"</strong>, you must delete the <code>src/</code> folder in your repo.
+                              </p>
+                              <p className="text-[9px] text-gray-500">
+                                Place all code files at the <strong>ROOT</strong> of your repository.
+                              </p>
                            </div>
                         </div>
 
@@ -284,18 +348,18 @@ const App: React.FC = () => {
                            <div className="p-4 bg-black/40 border-b border-white/5 flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                  <span className="text-xs font-mono text-blue-400">{selectedFile}</span>
-                                 <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold px-2 py-0.5 border border-white/5 rounded">Plain Text</span>
+                                 <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold px-2 py-0.5 border border-white/5 rounded">Full Source</span>
                               </div>
                               <button 
                                 onClick={() => copyToClipboard(projectFiles[selectedFile])}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-xl"
                               >
-                                {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-                                {copied ? 'Copied' : 'Copy Code'}
+                                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copied ? 'Copied to Clipboard' : 'Copy File Content'}
                               </button>
                            </div>
                            <div className="flex-1 overflow-auto p-6 font-mono text-[11px] leading-relaxed">
-                              <pre className="text-gray-400 bg-black/50 p-6 rounded-2xl border border-white/5 min-h-full">
+                              <pre className="text-gray-400 bg-black/50 p-8 rounded-3xl border border-white/5 min-h-full whitespace-pre-wrap">
                                 {projectFiles[selectedFile]}
                               </pre>
                            </div>
@@ -307,37 +371,42 @@ const App: React.FC = () => {
                      <div className="p-12 space-y-8 animate-in fade-in slide-in-from-right-4 duration-400 overflow-y-auto">
                         <div className="flex items-center gap-4">
                            <Globe className="w-10 h-10 text-orange-400" />
-                           <h3 className="text-2xl font-black">Configure Pages Build</h3>
+                           <h3 className="text-2xl font-black">Final Cloudflare Steps</h3>
                         </div>
-                        <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
-                           Ensure your Cloudflare Pages dashboard uses these exact settings to properly bundle the 3D tool.
-                        </p>
-
-                        <div className="grid grid-cols-1 gap-4">
-                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center">
-                              <div>
-                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Build Command</p>
-                                 <code className="text-orange-400 font-mono text-lg">npm run build</code>
+                        
+                        <div className="bg-[#1a1a1a] border border-[#262626] rounded-3xl p-8 space-y-6">
+                           <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0">
+                                 <Monitor className="w-5 h-5 text-orange-400" />
                               </div>
-                              <button onClick={() => copyToClipboard('npm run build')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg">
-                                 <Copy className="w-4 h-4 text-gray-500" />
-                              </button>
+                              <div>
+                                 <h4 className="text-sm font-bold uppercase tracking-wider">Root Build Config</h4>
+                                 <p className="text-xs text-gray-500">Ensure Cloudflare looks for files in the root, not <code>/src</code></p>
+                              </div>
                            </div>
-                           <div className="bg-[#1a1a1a] border border-[#262626] rounded-2xl p-6 flex justify-between items-center">
+
+                           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                               <div>
-                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Output Directory</p>
-                                 <code className="text-orange-400 font-mono text-lg">dist</code>
+                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-2 tracking-widest">Build Command</p>
+                                 <div className="flex items-center justify-between bg-black p-4 rounded-xl border border-white/5">
+                                    <code className="text-orange-400 font-mono">npm run build</code>
+                                    <button onClick={() => copyToClipboard('npm run build')} className="hover:text-white text-gray-600"><Copy className="w-4 h-4" /></button>
+                                 </div>
                               </div>
-                              <button onClick={() => copyToClipboard('dist')} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg">
-                                 <Copy className="w-4 h-4 text-gray-500" />
-                              </button>
+                              <div>
+                                 <p className="text-[10px] text-gray-500 uppercase font-black mb-2 tracking-widest">Output Directory</p>
+                                 <div className="flex items-center justify-between bg-black p-4 rounded-xl border border-white/5">
+                                    <code className="text-orange-400 font-mono">dist</code>
+                                    <button onClick={() => copyToClipboard('dist')} className="hover:text-white text-gray-600"><Copy className="w-4 h-4" /></button>
+                                 </div>
+                              </div>
                            </div>
                         </div>
 
                         <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center gap-4">
                            <Info className="w-6 h-6 text-blue-400" />
                            <p className="text-xs text-blue-200">
-                             Every GitHub push triggers an automatic update to your Shopify store.
+                             <strong>Tip:</strong> After pushing the "Root Code" files, trigger a "Clear Cache and Redeploy" in Cloudflare to see the tool.
                            </p>
                         </div>
                      </div>
@@ -347,28 +416,21 @@ const App: React.FC = () => {
                      <div className="p-12 space-y-8 animate-in fade-in slide-in-from-right-4 duration-400 overflow-y-auto">
                         <div className="flex items-center gap-4">
                            <ShoppingBag className="w-10 h-10 text-green-400" />
-                           <h3 className="text-2xl font-black">Liquid Theme Code</h3>
+                           <h3 className="text-2xl font-black">Shopify Liquid Section</h3>
                         </div>
                         
                         <div className="space-y-6">
                            <div className="relative group">
-                              <pre className="bg-black border border-[#262626] rounded-3xl p-10 text-[11px] font-mono text-gray-400 overflow-x-auto max-h-[350px] leading-relaxed">
+                              <pre className="bg-black border border-[#262626] rounded-3xl p-10 text-[11px] font-mono text-gray-400 overflow-x-auto max-h-[400px] leading-relaxed">
                                  {shopifyFullToolCode}
                               </pre>
                               <button 
                                 onClick={() => copyToClipboard(shopifyFullToolCode)}
-                                className="absolute top-6 right-6 flex items-center gap-2 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-[10px] font-black rounded-xl shadow-xl transition-all active:scale-95"
+                                className="absolute top-6 right-6 flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-[10px] font-black rounded-xl shadow-2xl transition-all active:scale-95"
                               >
                                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                COPY CODE
+                                COPY LIQUID CODE
                               </button>
-                           </div>
-
-                           <div className="flex gap-4 p-6 bg-white/5 rounded-2xl border border-white/5">
-                             <CheckCircle2 className="w-5 h-5 text-green-500" />
-                             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                               Add this to your "Sections" folder as <code>3d-text-editor.liquid</code>.
-                             </p>
                            </div>
                         </div>
                      </div>
@@ -381,11 +443,11 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-3">
                    <div className={`w-2 h-2 rounded-full ${urlValidation.isValid ? 'bg-green-500' : 'bg-orange-500'} shadow-[0_0_8px_rgba(34,197,94,0.5)]`} />
                    <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">
-                      {urlValidation.isValid ? `LIVE: ${urlValidation.url}` : 'NEEDS PRODUCTION URL'}
+                      {urlValidation.isValid ? `CONNECTED: ${urlValidation.url}` : 'INVALID PRODUCTION URL'}
                    </span>
                 </div>
                 <div className="text-[9px] text-gray-700 font-mono font-bold uppercase tracking-widest">
-                   V3.1.8-STABLE
+                   CORE ENGINE: V3.2.0-STABLE
                 </div>
              </div>
           </div>
