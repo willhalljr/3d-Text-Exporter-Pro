@@ -69,7 +69,6 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(({ textSettings, materialSetti
     scene.add(dirLight);
 
     const rgbeLoader = new RGBELoader();
-    // Use a more stable CDN for the environment map
     rgbeLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/equirectangular/venice_sunset_1k.hdr', (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       scene.environment = texture;
@@ -137,11 +136,19 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(({ textSettings, materialSetti
 
   useEffect(() => {
     const updateGeometry = async () => {
-      if (!sceneRef.current || !textSettings.text.trim()) return;
-      onLoadingStateChange(true);
-      
+      if (!sceneRef.current) return;
       const { scene, material, textMesh: oldMesh } = sceneRef.current;
 
+      // Handle empty text by clearing the mesh but not showing loader
+      if (!textSettings.text.trim()) {
+        if (oldMesh) scene.remove(oldMesh);
+        sceneRef.current.textMesh = null;
+        onLoadingStateChange(false);
+        return;
+      }
+
+      onLoadingStateChange(true);
+      
       try {
         const font = await FontService.loadFont(currentFontUrl);
         const shapes = FontService.createShapesFromFont(
@@ -154,6 +161,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(({ textSettings, materialSetti
         );
 
         if (shapes.length === 0) {
+          if (oldMesh) scene.remove(oldMesh);
+          sceneRef.current.textMesh = null;
           onLoadingStateChange(false);
           return;
         }
@@ -199,13 +208,13 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(({ textSettings, materialSetti
         scene.add(mesh);
         sceneRef.current.textMesh = mesh;
       } catch (err) {
-        console.error("3D Troubleshoot Error:", err);
+        console.error("3D Geometry Error:", err);
       } finally {
         onLoadingStateChange(false);
       }
     };
 
-    const timer = setTimeout(updateGeometry, 100);
+    const timer = setTimeout(updateGeometry, 50); // Faster update
     return () => clearTimeout(timer);
   }, [textSettings, currentFontUrl, onLoadingStateChange]);
 

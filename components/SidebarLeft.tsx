@@ -37,14 +37,14 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           </button>
           <div className="h-px w-6 bg-white/5" />
           <div className="flex-1 flex flex-col justify-center">
-             <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.5em] text-gray-700 select-none">Design Center</span>
+             <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 select-none">Design Center</span>
           </div>
         </div>
 
         {/* Content - Hidden when collapsed */}
         <div className={`flex flex-col w-full transition-opacity duration-300 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           <div className="p-5 border-b border-[#222] flex items-center justify-between bg-[#0f0f0f] shrink-0">
-            <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-500">Design Center</h2>
+            <h2 className="font-black text-[11px] uppercase tracking-[0.3em] text-white">Design Center</h2>
             <div className="flex gap-2">
               <button 
                   onClick={onSaveCustom}
@@ -60,8 +60,8 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
 
           <div className="flex-1 overflow-y-auto p-6 space-y-10 scroll-smooth">
             <section className="space-y-4">
-              <div className="flex items-center gap-2 text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                <Type className="w-4 h-4 text-blue-500/50" /> Text Content
+              <div className="flex items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                <Type className="w-4 h-4" /> Text Content
               </div>
               <textarea 
                 value={textSettings.text} 
@@ -73,15 +73,15 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
             </section>
 
             <section className="space-y-4">
-              <div className="flex items-center gap-2 text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                <MousePointer2 className="w-4 h-4 text-blue-500/50" /> Typography
+              <div className="flex items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                <MousePointer2 className="w-4 h-4" /> Typography
               </div>
               <button 
                 onClick={onOpenFontDrawer}
                 className="w-full flex items-center justify-between p-5 bg-black border border-[#222] hover:border-blue-500/50 rounded-2xl transition-all group shadow-sm"
               >
-                <div className="flex flex-col items-start">
-                   <span className="text-[9px] text-gray-600 font-black uppercase mb-1 tracking-wider">Active Typeface</span>
+                <div className="flex flex-col items-start text-left">
+                   <span className="text-[9px] text-gray-400 font-black uppercase mb-1 tracking-wider">Active Typeface</span>
                    <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{currentFont.family}</span>
                 </div>
                 <div className="p-2.5 bg-white/5 rounded-xl text-gray-500 group-hover:text-blue-400 transition-all">
@@ -91,8 +91,8 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
             </section>
 
             <section className="space-y-4 pb-4">
-              <div className="flex items-center gap-2 text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                <Palette className="w-4 h-4 text-blue-500/50" /> Presets
+              <div className="flex items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                <Palette className="w-4 h-4" /> Style Presets
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {customPresets.map(preset => (
@@ -109,7 +109,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                         backgroundSize: 'cover'
                       }}
                     />
-                    <span className="text-[9px] text-gray-400 truncate w-full text-center uppercase font-black tracking-tight">{preset.name}</span>
+                    <span className="text-[9px] text-white truncate w-full text-center uppercase font-black tracking-tight">{preset.name}</span>
                     <button 
                       onClick={(e) => { e.stopPropagation(); onDeleteCustom(preset.id); }}
                       className="absolute top-1.5 right-1.5 p-1.5 bg-red-500/10 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
@@ -119,7 +119,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                   </div>
                 ))}
                 {customPresets.length === 0 && (
-                  <div className="col-span-2 py-10 text-center border border-dashed border-[#222] rounded-2xl text-gray-700 text-[10px] uppercase font-black tracking-widest">
+                  <div className="col-span-2 py-10 text-center border border-dashed border-[#222] rounded-2xl text-gray-600 text-[10px] uppercase font-black tracking-widest">
                     No Styles Saved
                   </div>
                 )}
@@ -130,7 +130,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           <div className="p-6 bg-[#0a0a0a] border-t border-[#222] shrink-0">
              <button 
                onClick={onDownloadZip}
-               className="w-full flex items-center justify-center gap-3 py-4 bg-white/5 hover:bg-white/10 border border-[#222] text-gray-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all"
+               className="w-full flex items-center justify-center gap-3 py-4 bg-white/5 hover:bg-white/10 border border-[#222] text-gray-300 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all"
              >
                 <FileArchive className="w-4 h-4" /> Export Assets
              </button>
